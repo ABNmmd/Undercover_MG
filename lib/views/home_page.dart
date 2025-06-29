@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
 import '../models/game.dart';
 import 'player_setup_screen.dart';
+import 'role_distribution_screen.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -174,13 +175,7 @@ class HomePage extends StatelessWidget {
     BuildContext context,
     GameProvider gameProvider,
   ) {
-    return const Center(
-      child: Text(
-        'Role Distribution Screen\n(Coming Soon)',
-        textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 24),
-      ),
-    );
+    return const RoleDistributionScreen();
   }
 
   Widget _buildDescriptionScreen(
