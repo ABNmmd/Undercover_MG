@@ -82,6 +82,30 @@ class GameProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // Move to next player in description phase
+  void nextPlayerDescription() {
+    if (_currentPlayerIndex < _game.alivePlayers.length - 1) {
+      _currentPlayerIndex++;
+    } else {
+      // All players have described, move to voting phase
+      startVoting();
+    }
+    notifyListeners();
+  }
+
+  // Get current player for description phase
+  Player? get currentDescriptionPlayer {
+    if (_currentPlayerIndex < _game.alivePlayers.length) {
+      return _game.alivePlayers[_currentPlayerIndex];
+    }
+    return null;
+  }
+
+  // Check if all players have described
+  bool get allPlayersDescribed {
+    return _currentPlayerIndex >= _game.alivePlayers.length - 1;
+  }
+
   // Start voting phase
   void startVoting() {
     // Reset voting status for all alive players
