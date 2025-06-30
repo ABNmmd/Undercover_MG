@@ -4,6 +4,10 @@ import '../providers/game_provider.dart';
 import '../models/game.dart';
 import 'player_setup_screen.dart';
 import 'role_distribution_screen.dart';
+import 'description_screen.dart';
+import 'voting_screen.dart';
+import 'results_screen.dart';
+import 'game_over_screen.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -31,11 +35,11 @@ class HomePage extends StatelessWidget {
       case GameState.description:
         return _buildDescriptionScreen(context, gameProvider);
       case GameState.voting:
-        return _buildVotingScreen(context, gameProvider);
+        return const VotingScreen();
       case GameState.results:
-        return _buildResultsScreen(context, gameProvider);
+        return const ResultsScreen();
       case GameState.gameOver:
-        return _buildGameOverScreen(context, gameProvider);
+        return const GameOverScreen();
     }
   }
 
@@ -182,42 +186,6 @@ class HomePage extends StatelessWidget {
     BuildContext context,
     GameProvider gameProvider,
   ) {
-    return const Center(
-      child: Text(
-        'Description Screen\n(Coming Soon)',
-        textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 24),
-      ),
-    );
-  }
-
-  Widget _buildVotingScreen(BuildContext context, GameProvider gameProvider) {
-    return const Center(
-      child: Text(
-        'Voting Screen\n(Coming Soon)',
-        textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 24),
-      ),
-    );
-  }
-
-  Widget _buildResultsScreen(BuildContext context, GameProvider gameProvider) {
-    return const Center(
-      child: Text(
-        'Results Screen\n(Coming Soon)',
-        textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 24),
-      ),
-    );
-  }
-
-  Widget _buildGameOverScreen(BuildContext context, GameProvider gameProvider) {
-    return const Center(
-      child: Text(
-        'Game Over Screen\n(Coming Soon)',
-        textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 24),
-      ),
-    );
+    return const DescriptionScreen();
   }
 }
