@@ -39,6 +39,114 @@ class _RoleDistributionScreenState extends State<RoleDistributionScreen> {
     });
   }
 
+  void _showQuitGameDialog(BuildContext context, GameProvider gameProvider) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.transparent,
+          content: Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.3),
+                width: 2,
+              ),
+            ),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.warning_amber_rounded,
+                  color: Colors.orange,
+                  size: 48,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Quit Game?',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Are you sure you want to quit the current game?\nAll progress will be lost.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white70,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            side: BorderSide(
+                              color: Colors.white.withOpacity(0.5),
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          gameProvider.resetGame();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          elevation: 2,
+                        ),
+                        child: const Text(
+                          'Quit Game',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<GameProvider>(
@@ -64,9 +172,20 @@ class _RoleDistributionScreenState extends State<RoleDistributionScreen> {
                 ),
               ),
               centerTitle: true,
+              actions: [
+                IconButton(
+                  onPressed: () => _showQuitGameDialog(context, gameProvider),
+                  icon: const Icon(
+                    Icons.exit_to_app,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                  tooltip: 'Quit Game',
+                ),
+              ],
             ),
             body: SafeArea(
-              child: Padding(
+              child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
                   children: [
@@ -106,13 +225,14 @@ class _RoleDistributionScreenState extends State<RoleDistributionScreen> {
                     if (selectedPlayerName == null) const SizedBox(height: 30),
 
                     // Player cards or role display
-                    Expanded(
-                      child: selectedPlayerName == null
-                          ? _buildPlayerCards(gameProvider)
-                          : showingRole
-                          ? _buildRoleDisplay(gameProvider)
-                          : _buildConfirmationScreen(),
-                    ),
+                    selectedPlayerName == null
+                        ? _buildPlayerCards(gameProvider)
+                        : showingRole
+                        ? _buildRoleDisplay(gameProvider)
+                        : _buildConfirmationScreen(),
+                        
+                    // Add some bottom padding for better scrolling experience
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -126,23 +246,31 @@ class _RoleDistributionScreenState extends State<RoleDistributionScreen> {
   Widget _buildPlayerCards(GameProvider gameProvider) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
-      child: GridView.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 0.85, // Taller cards to give more vertical space
-        ),
-        itemCount: gameProvider.game.players.length,
-        itemBuilder: (context, index) {
-          final player = gameProvider.game.players[index];
-          final hasViewed = index < gameProvider.currentPlayerIndex;
-
-          return PlayerCard(
-            playerName: player.name,
-            onTap: hasViewed ? null : () => _selectPlayer(player.name),
-            isViewed: hasViewed,
-            isCurrentPlayer: index == gameProvider.currentPlayerIndex,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Calculate card width for 2 columns with spacing
+          final cardWidth = (constraints.maxWidth - 16) / 2; // 16 for spacing between cards
+          final cardHeight = cardWidth / 0.85; // aspect ratio 0.85
+          
+          return Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            children: gameProvider.game.players.asMap().entries.map((entry) {
+              final index = entry.key;
+              final player = entry.value;
+              final hasViewed = index < gameProvider.currentPlayerIndex;
+              
+              return SizedBox(
+                width: cardWidth,
+                height: cardHeight,
+                child: PlayerCard(
+                  playerName: player.name,
+                  onTap: hasViewed ? null : () => _selectPlayer(player.name),
+                  isViewed: hasViewed,
+                  isCurrentPlayer: index == gameProvider.currentPlayerIndex,
+                ),
+              );
+            }).toList(),
           );
         },
       ),
